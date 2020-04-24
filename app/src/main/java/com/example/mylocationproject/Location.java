@@ -23,6 +23,7 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 
 import com.google.android.gms.auth.api.Auth;
@@ -83,6 +84,8 @@ public class Location extends AppCompatActivity implements GoogleApiClient.OnCon
     Dialog dialog;
     Dialog distanceDialog;
 
+    private boolean flag = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -121,7 +124,6 @@ public class Location extends AppCompatActivity implements GoogleApiClient.OnCon
                 .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     public void onClick(@SuppressWarnings("unused") final DialogInterface dialog, @SuppressWarnings("unused") final int id) {
 
-
                         dialog.dismiss();
                         Intent callGPSSettingIntent = new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
                         startActivityForResult(callGPSSettingIntent,111);
@@ -141,18 +143,29 @@ public class Location extends AppCompatActivity implements GoogleApiClient.OnCon
     }
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-      super.onActivityResult(requestCode, resultCode, data);
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 111) {
+            final LocationManager manager = (LocationManager) getSystemService( Context.LOCATION_SERVICE );
+            if ( !manager.isProviderEnabled( LocationManager.GPS_PROVIDER ) ) {
+                buildAlertMessageNoGps();
+            }else{
+                Toast.makeText(this,"Gps is enabled",Toast.LENGTH_SHORT).show();
+                locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
 
-        for (Fragment fragment : getSupportFragmentManager().getFragments()) {
-            fragment.onActivityResult(requestCode, resultCode, data);
-        }
-        if (resultCode == 111) {
-            switch (requestCode) {
-                case 1:
-                    break;
+                checkProviderEnabled(locationManager);
+
             }
         }
     }
+
+/*    @Override
+    protected void onResume(){
+        super.onResume();
+        if (flag) {
+            startActivity(new Intent(this, MainActivity.class));
+            finish();
+        }
+    }*/
 
 
     private void checkProviderEnabled(LocationManager locationManager) {

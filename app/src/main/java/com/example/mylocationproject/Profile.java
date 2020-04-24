@@ -73,12 +73,29 @@ public class Profile extends AppCompatActivity implements GoogleApiClient.OnConn
 
         if (result.isSuccess()) {
             GoogleSignInAccount account = result.getSignInAccount();
+            if(account.getId()!=null) {
 
-            tvUserName.setText(account.getDisplayName().toUpperCase());
-            tvUserMail.setText(account.getEmail());
-            tvUserId.setText(account.getId());
+                tvUserName.setText(account.getDisplayName().toUpperCase());
+                tvUserMail.setText(account.getEmail());
+                tvUserId.setText(account.getId());
 
-            Picasso.get().load(account.getPhotoUrl()).placeholder(R.mipmap.ic_launcher).into(ivProfilePhoto);
+                Picasso.get().load(account.getPhotoUrl()).placeholder(R.mipmap.ic_launcher).into(ivProfilePhoto);
+            }else {
+
+                Auth.GoogleSignInApi.signOut(googleApiClient).setResultCallback(new ResultCallback<Status>() {
+                    @Override
+                    public void onResult(@NonNull Status status) {
+                        if (status.isSuccess()) {
+                            startActivity(new Intent(Profile.this, Login.class));
+                            finish();
+                        } else
+                            Toast.makeText(Profile.this, "LOGOUT FAILED", Toast.LENGTH_SHORT).show();
+                    }
+                });
+
+                intent = new Intent(this, Login.class);
+                startActivity(intent);
+            }
 
         } else {
             startActivity(new Intent(Profile.this,Login.class));
